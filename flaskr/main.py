@@ -56,7 +56,7 @@ def search(anses, ans, searchterm):
 
         
         count = 0
-        while ('.' not in current and '?' not in current):
+        while ('.' not in current):
             newId+=1
             if (count>10 or newId>= len(overall[ans[nd]['dct']]['segments'])):
                 print(str(ans[nd]['dct']))
@@ -69,15 +69,12 @@ def search(anses, ans, searchterm):
 
         if (nope):
             continue
-
-        if (current.index('?')!=-1):
-            if (current.index('?')>current.index(searchterm)):
-                current = current[:current.index('.')+2]
-        elif (current.index('.')>current.index(searchterm)):
+        
+        if (current.index('.')>current.index(searchterm)):
             current = current[:current.index('.')+2]
 
         count = 0
-        while (current.count('.') + current.count('?') <2):
+        while (current.count('.') <2):
             id-=1
             if (count>10 or id<0):
                 nope = True
