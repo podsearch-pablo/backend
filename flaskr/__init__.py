@@ -9,6 +9,7 @@ import json
 import sys
 sys.path.insert(1, './flaskr')
 from main import masterSearch
+import modules
 
 
 
@@ -55,6 +56,24 @@ def create_app(test_config=None):
         print(type(val))
 
         return val
+
+    
+    @app.post('/query')
+    def query():
+        data = request.json
+        print(data['query'])
+
+        return modules.answer_question(data['query'])
+    
+    @app.post('/poem')
+    def querypoem():
+        data = request.json
+        print(data['query'])
+
+        return modules.answer_question_poem(data['query'])
+
+
+        
 
 
 
