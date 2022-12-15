@@ -13,7 +13,6 @@ import modules
 
 
 
-
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -45,30 +44,28 @@ def create_app(test_config=None):
         return 'Hello, World!'
 
 
+    # perform a search for passed in search term
     @app.post('/details')
     def details():
+        print("plaintext search")
         data = request.json
-        print(data['searchterm'])
-        val = masterSearch(data['searchterm'])
-       
-        val = json.dumps(val)
-        print(val)
-        print(type(val))
-
+        val = json.dumps(masterSearch(data['searchterm']))
         return val
 
     
+    # ask Colin and Samir AI a context-specific question, recieve an answer + relevant clip
     @app.post('/query')
     def query():
+        print("querying")
         data = request.json
-        print(data['query'])
 
         return modules.answer_question(data['query'])
     
+    # same as query but answer is in the form of a poem
     @app.post('/poem')
     def querypoem():
+        print("querying for a poem")
         data = request.json
-        print(data['query'])
 
         return modules.answer_question_poem(data['query'])
 

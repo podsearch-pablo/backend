@@ -19,10 +19,15 @@ for i in range(4,78):
 
 
 def checkExists(word):
+    """
+    Prints the index of a given word in the corpus of data
+    """
     print(data['text'].index(word))
 
-#get the times
 def getTimes(word):
+    """
+    Returns the number of times a word appears
+    """
     times = []
     i = 0
     ind = 0
@@ -38,14 +43,13 @@ def getTimes(word):
 
 
 
-# Sets the 'anses' list up
 def search(anses, ans, searchterm):
-
-
+    """
+    Sets up "anses", the TODO
+    """
     for nd in range(len(ans)):
 
         timeStart = ans[nd]['start']
-        print("TIME " + str(timeStart))
 
         nope = False
         
@@ -53,13 +57,10 @@ def search(anses, ans, searchterm):
         current = ans[nd]['text']
         id = ans[nd]['id']
         newId = id
-
-        
         count = 0
         while ('.' not in current):
             newId+=1
             if (count>10 or newId>= len(overall[ans[nd]['dct']]['segments'])):
-                print(str(ans[nd]['dct']))
                 nope = True
                 break
 
@@ -81,10 +82,7 @@ def search(anses, ans, searchterm):
                 break
             current = overall[ans[nd]['dct']]['segments'][id]['text'] + current 
             timeStart = overall[ans[nd]['dct']]['segments'][id]['start']
-
             count+=1
-
-            
         if (nope):
             continue
         youtubeURL = overall[ans[nd]['dct']]['info']['Link']
@@ -95,6 +93,9 @@ def search(anses, ans, searchterm):
 
 
 def listofids():
+    """
+    Prints a list of ids given the vids database
+    """
     with open('./flaskr/vids.json') as info:
         dct = json.load(info)
 
@@ -107,65 +108,48 @@ def listofids():
 
 #returns the list of everything
 def getSearch(anses):
+    """
+    Returns the full list of all data given anses TODO
+    """
     if (len(anses)==0):
         return []
     ind = anses[0][1]
 
     results = []
-
     vidResults = {}
-
-
-
     nextResult = {}
-
     vidResults['Name'] = overall[anses[0][1]]['info']['Name']
     vidResults['Clips'] = []
 
-    print(vidResults['Name'])
 
 
 
 
     for line in anses:
         if (line[1]!=ind):
-            print()
-            print()
-            print()
-            print()
             ind=line[1]
             
             results.append(vidResults)
             vidResults = {}
             vidResults['Name'] = overall[ind]['info']['Name']
             vidResults['Clips'] = []
-            
-            print(overall[ind]['info']['Name'])
-            
-            print()
-        
+
         nextResult['text']=str(line[0])
         nextResult['link']='https://youtu.be/' + str(line[3][28:]) + '?t=' + str(int(line[2]))
         nextResult['exactTime']=line[2]
-        
         vidResults['Clips'].append(nextResult)
-        
         nextResult = {}
-        
-        print(str(line[0]))
-        print('https://youtu.be/' + str(line[3][28:]) + '?t=' + str(int(line[2])))
-        print(line[2])
-        print()
-
+    
     results.append(vidResults)
     return results
 
 
 from functools import cmp_to_key
 
-#custom searching feature 
 def compare(dct1, dct2):
-    
+    """
+    Compares the length of two dictionaries' clips (used for sorting)
+    """
     if len(dct1['Clips']) < len(dct2['Clips']):
         return 1
     elif len(dct1['Clips']) > len(dct2['Clips']):
@@ -175,30 +159,17 @@ def compare(dct1, dct2):
 
 
 def masterSearch(searchterm):
-    print("AT MAIN")
+    """
+    The 'master search' for a term
+    """
 
+    ans = getTimes(searchterm)
+    answers = []
 
-    searchingFor = searchterm
-    ans = getTimes(searchingFor)
+    search(answers, ans, searchterm)
+    unsortedResults = getSearch(answers)
+    results = sorted(unsortedResults, key=cmp_to_key(compare))
 
-    anses = []
-
-    search(anses, ans,searchingFor)
-
-
-    results = getSearch(anses)
-
-
-
-    results = sorted(results, key=cmp_to_key(compare))
-
-    for val in results:
-        print("NAME IS " + str(val['Name']))
-        for adct in val['Clips']:
-            print(adct['text'])
-            print(adct['link'])
-        print()
-        print()
     return results
 
 if __name__ == '__main__':

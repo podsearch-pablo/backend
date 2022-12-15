@@ -65,7 +65,10 @@ def reduce_long(
 
 
 def loadTimeStampSegments():
- 
+    """
+    Returns the time stamp segments loaded from 'timestampsegments.json' as a dictionary
+    """
+
     totalText = {}
     with open('./flaskr/timestampsegments.json') as fp:
         totalText = json.load(fp)
@@ -81,9 +84,7 @@ def loadTimeStampSegments():
     df = []
     for i in range(len(sample)):
         tempCount = 0
-
         category = i
-
         for a in sample[i].keys():
             lst = []
             lst.append(category)
@@ -102,6 +103,10 @@ def loadTimeStampSegments():
 
 
 def get_embedding(text: str, model: str) -> list[float]:
+    """
+    Creates and returns an embedding from passed in string and OpenAI model
+    """
+
     result = openai.Embedding.create(
       model=model,
       input=text
@@ -109,10 +114,16 @@ def get_embedding(text: str, model: str) -> list[float]:
     return result["data"][0]["embedding"]
 
 def get_doc_embedding(text: str) -> list[float]:
+    """
+    Returns the embeddings for a given text, using pretermined document embedding model
+    """
     time.sleep(1)
     return get_embedding(text, DOC_EMBEDDINGS_MODEL)
 
 def get_query_embedding(text: str) -> list[float]:
+    """
+    Returns the embeddings for a given text, using pretermined query embedding model
+    """
     return get_embedding(text, QUERY_EMBEDDINGS_MODEL)
 
 def compute_doc_embeddings(df: pd.DataFrame) -> dict[tuple[str, str], list[float]]:
@@ -150,7 +161,7 @@ def order_document_sections_by_query_similarity(query: str, contexts: dict[(str,
 
 def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame) -> str:
     """
-    Fetch relevant 
+    Creates a prompt given a question, context embeddings, and a dataframe of TODO
     """
     most_relevant_document_sections = order_document_sections_by_query_similarity(question, context_embeddings)
     
@@ -181,7 +192,7 @@ def construct_prompt(question: str, context_embeddings: dict, df: pd.DataFrame) 
 
 def construct_prompt_poem(question: str, context_embeddings: dict, df: pd.DataFrame) -> str:
     """
-    Fetch relevant 
+    Creates a prompt (which returns a poem) given a question, context embeddings, and a dataframe of TODO
     """
     most_relevant_document_sections = order_document_sections_by_query_similarity(question, context_embeddings)
     
@@ -217,6 +228,9 @@ def answer_query_with_context(
     document_embeddings: dict[(str, str), np.array],
     show_prompt: bool = False
 ) -> str:
+    """
+    Answers a passed in query based on passed in embeddings and dataframe of TODO
+    """ 
     
     (prompt, values) = construct_prompt(
         query,
@@ -231,8 +245,6 @@ def answer_query_with_context(
                 prompt=prompt,
                 **COMPLETIONS_API_PARAMS
             )
-    
-
     return (response["choices"][0]["text"].strip(" \n"), values)
 
 def answer_query_with_context_poem(
@@ -241,6 +253,9 @@ def answer_query_with_context_poem(
     document_embeddings: dict[(str, str), np.array],
     show_prompt: bool = False
 ) -> str:
+    """
+    Answers a passed in query based on passed in embeddings and dataframe of TODO in poem format
+    """ 
     
     (prompt, values) = construct_prompt_poem(
         query,
@@ -261,9 +276,9 @@ def answer_query_with_context_poem(
 
 
 def load_context_embeddings():
-    '''
-    reads context embeddings from context_embeddings.csv
-    '''
+    """
+    Reads context embeddings from context_embeddings.csv
+    """
     dct = pd.read_csv('./flaskr/context_embeddings.csv')
     lst = {}
     dct = dct.values.tolist()
@@ -273,6 +288,10 @@ def load_context_embeddings():
 
 
 def answer_question(text):
+    """
+    Answers a passed in question using loaded embeddings + predetermined models
+    """
+
     new_context = load_context_embeddings()
     df = loadTimeStampSegments()
     (answer, relevant) =  (answer_query_with_context(text, df, new_context))
@@ -287,6 +306,9 @@ def answer_question(text):
 
 
 def answer_question_poem(text):
+    """
+    Answers a passed in question using loaded embeddings + predetermined models, in the format of a poem
+    """
     new_context = load_context_embeddings()
     df = loadTimeStampSegments()
     (answer, relevant) =  (answer_query_with_context_poem(text, df, new_context))
@@ -301,7 +323,9 @@ def answer_question_poem(text):
 
 
 def getTupleFromIndex(index):
-    
+    """
+    Given an index of a clip, returns the relevant timestamp, name of video, and link
+    """
 
     with open('./flaskr/timestampsegments.json') as info:
         dct = json.load(info)
